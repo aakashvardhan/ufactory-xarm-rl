@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xarm_twin"
+version = "0.1.0"
+description = "UFactory xArm6 + xArm gripper tasks for Isaac Lab"
+requires-python = ">=3.10"
+# Isaac Sim / Isaac Lab are installed separately (see README); only the import-time dependency is listed.
+dependencies = ["gymnasium"]
+
+[tool.setuptools.packages.find]
+include = ["xarm_twin*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

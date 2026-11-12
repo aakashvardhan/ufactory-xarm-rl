@@ -1,0 +1,9 @@
+logs/
+outputs/
+__pycache__/
+*.pyc
+videos/
+*.egg-info/
+.venv/
+*.pt
+.pytest_cache/
