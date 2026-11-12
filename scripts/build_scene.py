@@ -7,11 +7,13 @@
   lab_lights.usd  dome + ceiling light. Spawn once per stage, not once per environment.
   paper_cube.usd  5.2 cm paper-wrapped cube, rigid body.
   food_bowl.usd   square frosted food container, rigid body, five box colliders (the cavity stays open).
-  lab_scene.usd   assembly of the files above plus the xArm6 with its wrist depth camera, for opening in
+  lab_scene.usd   assembly of the files above plus a ground plane and the xArm6 with its wrist depth camera, for opening in
                   Isaac Sim. Pick /Scene/Bench/OverheadCam/camera or .../wrist_cam/camera in the viewport.
 
 Frame: origin at the centre of arm A's base on the bench top (z = 0). +X across the bench away from the
-mounting edge, +Y along the mounting edge toward arm B, +Z up. Metres, kilograms.
+mounting edge, +Y along the mounting edge toward arm B, +Z up. Metres, kilograms. lab_scene.usd alone lifts
+/Scene by BENCH_HEIGHT so its floor sits on z = 0, where Isaac Sim draws its viewport grid; the Isaac Lab
+configs use the files in the bench-top frame.
 
 Only the cube edge (0.052 m) is measured. Every other size is an estimate from photos; edit the constants
 below and rerun.
@@ -59,6 +61,8 @@ STAND_Y = 0.32  # where the clamp sits along the mounting edge, estimate
 STAND_TUBE_RADIUS = 0.015
 STAND_POLE = 0.40
 STAND_ARM = 0.28  # each of the two arms
+GROUND_SIZE = 20.0  # visual square; the collision plane is infinite
+GROUND_GAP = 0.001  # ground plane this far below the lab floor's top face
 CUBE_START = (0.40, 0.0, CUBE_EDGE / 2)
 BOWL_START = (0.42, 0.30, 0.0)
 
@@ -392,8 +396,33 @@ def build_bowl():
     return s
 
 
+def ground_plane(stage, path, z, size=GROUND_SIZE):
+    """Ground plane at height `z`: an infinite collision plane and a grey square to see it by."""
+    UsdGeom.Xform.Define(stage, path).AddTranslateOp().Set(Gf.Vec3d(0.0, 0.0, z))
+    plane = UsdGeom.Plane.Define(stage, path + "/CollisionPlane")  # PhysX treats a Plane as infinite
+    plane.CreateAxisAttr(UsdGeom.Tokens.z)
+    plane.CreateWidthAttr(size)
+    plane.CreateLengthAttr(size)
+    plane.CreateExtentAttr([(-size / 2, -size / 2, 0.0), (size / 2, size / 2, 0.0)])
+    plane.CreatePurposeAttr(UsdGeom.Tokens.guide)
+    UsdPhysics.CollisionAPI.Apply(plane.GetPrim())
+    h = size / 2
+    mesh = UsdGeom.Mesh.Define(stage, path + "/Visual")
+    mesh.CreatePointsAttr([(-h, -h, 0.0), (h, -h, 0.0), (h, h, 0.0), (-h, h, 0.0)])
+    mesh.CreateFaceVertexCountsAttr([4])
+    mesh.CreateFaceVertexIndicesAttr([0, 1, 2, 3])
+    mesh.CreateSubdivisionSchemeAttr(UsdGeom.Tokens.none)
+    mesh.CreateExtentAttr([(-h, -h, 0.0), (h, h, 0.0)])
+    grey = look(stage, path + "/Looks/Ground", (0.45, 0.46, 0.48), 0.9)
+    UsdShade.MaterialBindingAPI.Apply(mesh.GetPrim()).Bind(grey)
+
+
 def build_assembly():
     s = new_stage("lab_scene.usd", "/Scene")
+    # Floor on z = 0 for viewing: without this the viewport grid cuts through the bench top.
+    UsdGeom.Xformable(s.GetDefaultPrim()).AddTranslateOp().Set(Gf.Vec3d(0.0, 0.0, BENCH_HEIGHT))
+    # World z = -1 mm: just under the lab floor's top face, so the two surfaces do not flicker.
+    ground_plane(s, "/Scene/GroundPlane", -BENCH_HEIGHT - GROUND_GAP)
     scene = UsdPhysics.Scene.Define(s, "/Scene/PhysicsScene")
     scene.CreateGravityDirectionAttr(Gf.Vec3f(0.0, 0.0, -1.0))
     scene.CreateGravityMagnitudeAttr(9.81)
