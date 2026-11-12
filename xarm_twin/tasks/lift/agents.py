@@ -4,11 +4,11 @@ from isaaclab_rl.rsl_rl import RslRlMLPModelCfg, RslRlOnPolicyRunnerCfg, RslRlPp
 
 
 @configclass
-class XArm6PickPlacePPORunnerCfg(RslRlOnPolicyRunnerCfg):
+class XArm7PickPlacePPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
     max_iterations = 1500
     save_interval = 50
-    experiment_name = "xarm6_pickplace"
+    experiment_name = "xarm7_pickplace"
     actor = RslRlMLPModelCfg(
         hidden_dims=[256, 128, 64],
         activation="elu",

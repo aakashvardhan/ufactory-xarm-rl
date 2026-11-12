@@ -1,6 +1,6 @@
 # xarm_twin
 
-UFactory xArm6 + xArm gripper tasks for Isaac Lab: a cube pick-and-place task trained with rsl_rl PPO,
+UFactory xArm7 + xArm gripper tasks for Isaac Lab: a cube pick-and-place task trained with rsl_rl PPO,
 plus a scripted IK expert used as a grasp check and demonstration source.
 
 ## Requirements
@@ -10,8 +10,8 @@ plus a scripted IK expert used as a grasp check and demonstration source.
   the quaternion order to (x, y, z, w) and made asset data `ProxyArray`s, and the code here follows that.
 - Network access on first use. Two assets are loaded by URL from NVIDIA's asset server and cached by
   Omniverse afterwards:
-  - `assets/usd/xarm6_gripper.usd` is a thin override layer; it references the stock xArm6 asset under
-    `Assets/Isaac/5.1/Isaac/Robots/Ufactory/xarm6/xarm6.usd`.
+  - `assets/usd/xarm7_gripper.usd` is a thin override layer; it references the stock xArm7 asset under
+    `Assets/Isaac/6.2/Isaac/Robots/Ufactory/xarm7/xarm7.usd`.
   - The cube is `Props/Blocks/DexCube/dex_cube_instanceable.usd` from `ISAAC_NUCLEUS_DIR`.
 
 ### Setup (Windows)
@@ -36,8 +36,8 @@ default code page cannot encode.
 
 | Gym id | Actions | Use |
 | --- | --- | --- |
-| `XArm6-PickPlace-v0` | joint position targets + binary gripper | PPO training and playback |
-| `XArm6-PickPlace-IK-v0` | absolute TCP pose + binary gripper | scripted expert, demonstrations |
+| `XArm7-PickPlace-v0` | joint position targets + binary gripper | PPO training and playback |
+| `XArm7-PickPlace-IK-v0` | absolute TCP pose + binary gripper | scripted expert, demonstrations |
 
 Rewards, observations and terminations are inherited from Isaac Lab's `IsaacContrib-Lift-Cube-Franka`
 (`isaaclab_tasks.contrib.lift`). Playback uses the training task id: `isaaclab play` applies the env
@@ -47,8 +47,8 @@ selector such as `--checkpoint latest` only finds runs trained under the same ta
 ## Usage
 
 ```
-python scripts/train.py --task XArm6-PickPlace-v0
-python scripts/play.py --task XArm6-PickPlace-v0 --checkpoint latest --viz kit
+python scripts/train.py --task XArm7-PickPlace-v0
+python scripts/play.py --task XArm7-PickPlace-v0 --checkpoint latest --viz kit
 python scripts/scripted_expert.py --num_envs 64 --episodes 256
 ```
 
@@ -61,14 +61,14 @@ the cube within `--tol` of the goal; an episode that ends early because the cube
 
 Other scripts:
 
-- `scripts/make_asset.py` rebuilds `assets/usd/xarm6_gripper.usd` from the stock asset.
+- `scripts/make_asset.py` rebuilds `assets/usd/xarm7_gripper.usd` from the stock asset.
 - `scripts/diagnostics/check_asset.py` prints joints, limits, bodies and finger positions.
 - `scripts/diagnostics/check_tracking_ik.py` reports joint tracking error, finger geometry in the gripper
   frame, and an IK solve for the top-down home pose.
 - `scripts/build_scene.py` writes the lab-bench scene into `assets/usd/`: `lab_bench.usd` (bench, mount
   plate, wall, floor, and the overhead depth camera on its Tarion TKA01-L desk-mount stand), `lab_lights.usd`, `paper_cube.usd` (5.2 cm
   cube), `food_bowl.usd` (square container with five box colliders) and `lab_scene.usd`, which assembles them
-  with the xArm6 and its wrist depth camera for viewing in Isaac Sim. Only the cube edge is measured; the
+  with the xArm7 and its wrist depth camera for viewing in Isaac Sim. Only the cube edge is measured; the
   other sizes are estimates set by the constants at the top of the script. The pick-and-place tasks do not
   use this scene yet.
 - `xarm_twin/cameras.py` holds the lens (RealSense D435 colour, 640 x 360) and the poses of the wrist and
@@ -86,6 +86,10 @@ These tests do not start the simulator. They check that the package imports with
 that the gym ids are registered.
 
 ## Modelling notes
+
+- The lab's arms are xArm 7s (controller type 7, firmware v2.7.1) at 192.168.1.220 and 192.168.1.241. The
+  TCP offset (172 mm along the flange z-axis) and tool payload (0.82 kg, centre of mass 48 mm out) in
+  `xarm_twin/assets.py` were read from the controller at 192.168.1.241.
 
 - Gravity is disabled on the robot links to stand in for the real controller's gravity compensation.
   Joint torques in simulation therefore carry no gravity load.

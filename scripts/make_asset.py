@@ -1,6 +1,6 @@
-"""Build assets/usd/xarm6_gripper.usd: a thin override layer over Isaac Sim's UFactory xArm6 asset.
+"""Build assets/usd/xarm7_gripper.usd: a thin override layer over Isaac Sim's UFactory xArm7 asset.
 
-The stock asset (Robots/Ufactory/xarm6/xarm6.usd, variant xarm_gripper) carries TWO articulation roots:
+The stock asset (Robots/Ufactory/xarm7/xarm7.usd, variant xarm_gripper) carries TWO articulation roots:
 /UF_ROBOT/root_joint (arm) and /UF_ROBOT/gripper/root_joint (the gripper's own root, kept from its
 standalone asset). Isaac Lab needs exactly one, so this layer removes the gripper's root API and keeps
 everything else (meshes, mimic joints, drives) by reference.
@@ -10,10 +10,10 @@ import os
 from isaaclab.app import launch_simulation
 
 
-ASSET_ROOT = "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac"
-SRC = f"{ASSET_ROOT}/Robots/Ufactory/xarm6/xarm6.usd"
+ASSET_ROOT = "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/6.2/Isaac"
+SRC = f"{ASSET_ROOT}/Robots/Ufactory/xarm7/xarm7.usd"
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.normpath(os.path.join(HERE, "..", "assets", "usd", "xarm6_gripper.usd"))
+OUT = os.path.normpath(os.path.join(HERE, "..", "assets", "usd", "xarm7_gripper.usd"))
 
 
 def main():

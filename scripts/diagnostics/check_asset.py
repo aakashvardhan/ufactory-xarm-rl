@@ -1,4 +1,4 @@
-"""M0: spawn the xArm6 + gripper in Isaac Lab headless and report joints, limits, bodies and TCP geometry."""
+"""M0: spawn the xArm7 + gripper in Isaac Lab headless and report joints, limits, bodies and TCP geometry."""
 import argparse
 import os
 import sys
@@ -18,7 +18,7 @@ import torch  # noqa: E402
 import isaaclab.sim as sim_utils  # noqa: E402
 from isaaclab.assets import Articulation  # noqa: E402
 
-from xarm_twin.assets import GRIPPER_CLOSED, XARM6_CFG  # noqa: E402
+from xarm_twin.assets import GRIPPER_CLOSED, XARM7_CFG  # noqa: E402
 
 
 def main():
@@ -30,7 +30,7 @@ def main():
 def run(sim_cfg):
     sim = sim_utils.SimulationContext(sim_cfg)
     sim_utils.GroundPlaneCfg().func("/World/ground", sim_utils.GroundPlaneCfg())
-    robot = Articulation(XARM6_CFG.replace(prim_path="/World/Robot"))
+    robot = Articulation(XARM7_CFG.replace(prim_path="/World/Robot"))
     sim.reset()
     print("joints:", robot.joint_names)
     print("bodies:", robot.body_names)
@@ -60,7 +60,7 @@ def run(sim_cfg):
     for k in ("left_finger", "right_finger"):
         print(f"closed {k:24s} {b.get(k)}")
     q = robot.data.joint_pos.torch[0]
-    print("gripper joints closed (deg):", {n: round(math.degrees(q[i].item()), 1) for i, n in enumerate(robot.joint_names) if i >= 6})
+    print("gripper joints closed (deg):", {n: round(math.degrees(q[i].item()), 1) for i, n in enumerate(robot.joint_names) if i >= 7})
     print("CHECK_ASSET_OK")
 
 

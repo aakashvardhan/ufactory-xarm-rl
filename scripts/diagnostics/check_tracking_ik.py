@@ -9,7 +9,7 @@ import isaaclab.sim as sim_utils  # noqa: E402
 from isaaclab.assets import Articulation  # noqa: E402
 from isaaclab.controllers import DifferentialIKController, DifferentialIKControllerCfg  # noqa: E402
 from isaaclab.utils.math import subtract_frame_transforms, quat_apply, quat_inv, matrix_from_quat  # noqa: E402
-from xarm_twin.assets import GRIPPER_CLOSED, GRIPPER_OPEN, TCP_OFFSET, XARM6_CFG  # noqa: E402
+from xarm_twin.assets import GRIPPER_CLOSED, GRIPPER_OPEN, TCP_OFFSET, XARM7_CFG  # noqa: E402
 
 def main():
     sim_cfg = sim_utils.SimulationCfg(dt=0.01, device=args.device)
@@ -18,7 +18,7 @@ def main():
 
 def run(sim_cfg):
     sim = sim_utils.SimulationContext(sim_cfg)
-    robot = Articulation(XARM6_CFG.replace(prim_path="/World/Robot"))
+    robot = Articulation(XARM7_CFG.replace(prim_path="/World/Robot"))
     sim.reset()
     names = robot.joint_names
     def step(tgt, n):
@@ -27,8 +27,8 @@ def run(sim_cfg):
     tgt = robot.data.default_joint_pos.torch.clone()
     step(tgt, 300)
     e = (robot.data.joint_pos.torch - tgt)[0]
-    print("TRACK", {names[i]: round(math.degrees(e[i].item()), 2) for i in range(7)})
-    print("TORQUE", {names[i]: round(robot.actuators.applied_effort.torch[0, i].item(), 2) for i in range(7)})
+    print("TRACK", {names[i]: round(math.degrees(e[i].item()), 2) for i in range(8)})
+    print("TORQUE", {names[i]: round(robot.actuators.applied_effort.torch[0, i].item(), 2) for i in range(8)})
     bi = robot.body_names.index("xarm_gripper_base_link")
     gi = names.index("drive_joint")
     for label, g in (("open", GRIPPER_OPEN), ("closed", GRIPPER_CLOSED)):
@@ -43,7 +43,7 @@ def run(sim_cfg):
     print("GRIPPER_AXES_WORLD x,y,z cols:", [[round(v, 3) for v in R[:, k].tolist()] for k in range(3)])
     # IK to a top-down pose using the gripper base body; target TCP offset applied below
     ik = DifferentialIKController(DifferentialIKControllerCfg(command_type="pose", use_relative_mode=False, ik_method="dls"), num_envs=1, device=args.device)
-    arm = list(range(6))
+    arm = list(range(7))
     jac_idx = bi - 1  # fixed base: jacobian body index offset by one
     tcp_off = TCP_OFFSET  # same offset the env and the expert use
     goal_tcp = torch.tensor([[0.40, 0.0, 0.25]], device=args.device)
@@ -61,7 +61,7 @@ def run(sim_cfg):
         step(t3, 1)
     bp = robot.data.body_pos_w.torch[0, bi]; bq = robot.data.body_quat_w.torch[0, bi]
     tcp = bp + quat_apply(bq, torch.tensor([0.0, 0.0, tcp_off], device=args.device))
-    print("IK_HOME joints (rad):", [round(v, 4) for v in robot.data.joint_pos.torch[0, :6].tolist()])
+    print("IK_HOME joints (rad):", [round(v, 4) for v in robot.data.joint_pos.torch[0, :7].tolist()])
     print("IK_HOME tcp:", [round(v, 4) for v in tcp.tolist()], "quat:", [round(v, 3) for v in bq.tolist()])
     print("CHECK2_OK")
 

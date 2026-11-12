@@ -1,7 +1,7 @@
-"""XArm6-PickPlace-v0: pick a cube off the table and carry it to a commanded goal position.
+"""XArm7-PickPlace-v0: pick a cube off the table and carry it to a commanded goal position.
 
 Built on Isaac Lab's manager-based lift task (same rewards and observations as IsaacContrib-Lift-Cube-Franka),
-with the UFactory xArm6 + xArm gripper and a workspace matched to the xArm's reach.
+with the UFactory xArm7 + xArm gripper and a workspace matched to the xArm's reach.
 """
 from isaaclab_physx.sim.schemas import PhysxRigidBodyCfg
 
@@ -18,18 +18,18 @@ from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 from isaaclab_tasks.contrib.lift import mdp
 from isaaclab_tasks.contrib.lift.lift_env_cfg import LiftEnvCfg
 
-from xarm_twin.assets import GRIPPER_CLOSED, GRIPPER_OPEN, TCP_OFFSET, XARM6_CFG
+from xarm_twin.assets import ARM_JOINTS, GRIPPER_CLOSED, GRIPPER_OPEN, TCP_OFFSET, XARM7_CFG
 
 
 @configclass
-class XArm6PickPlaceEnvCfg(LiftEnvCfg):
+class XArm7PickPlaceEnvCfg(LiftEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.scene.num_envs = 2048  # 16 GB laptop GPU
-        self.scene.robot = XARM6_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        self.scene.robot = XARM7_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
         self.actions.arm_action = mdp.JointPositionActionCfg(
-            asset_name="robot", joint_names=["joint[1-6]"], scale=0.5, use_default_offset=True
+            asset_name="robot", joint_names=[ARM_JOINTS], scale=0.5, use_default_offset=True
         )
         # Only the drive joint is commanded; the five linkage joints follow through PhysX mimic joints.
         self.actions.gripper_action = mdp.BinaryJointPositionActionCfg(
@@ -88,14 +88,14 @@ class XArm6PickPlaceEnvCfg(LiftEnvCfg):
 # IK variant used by the scripted expert and for recording demonstrations (absolute TCP pose).
 # ---------------------------------------------------------------------------------------------
 @configclass
-class XArm6PickPlaceIKEnvCfg(XArm6PickPlaceEnvCfg):
+class XArm7PickPlaceIKEnvCfg(XArm7PickPlaceEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.scene.num_envs = 64
         self.observations.policy.enable_corruption = False
         self.actions.arm_action = DifferentialInverseKinematicsActionCfg(
             asset_name="robot",
-            joint_names=["joint[1-6]"],
+            joint_names=[ARM_JOINTS],
             body_name="xarm_gripper_base_link",
             controller=DifferentialIKControllerCfg(command_type="pose", use_relative_mode=False, ik_method="dls"),
             body_offset=DifferentialInverseKinematicsActionCfg.OffsetCfg(pos=[0.0, 0.0, TCP_OFFSET]),

@@ -34,7 +34,7 @@ from isaaclab.assets import Articulation, RigidObject, RigidObjectCfg  # noqa: E
 from isaaclab.sensors import Camera, CameraCfg  # noqa: E402
 
 from xarm_twin import cameras as cams  # noqa: E402
-from xarm_twin.assets import XARM6_CFG  # noqa: E402
+from xarm_twin.assets import XARM7_CFG  # noqa: E402
 
 USD = os.path.join(ROOT, "assets", "usd")
 LOGS = os.path.join(ROOT, "logs")
@@ -53,7 +53,7 @@ def main():
         cfg = sim_utils.UsdFileCfg(usd_path=os.path.join(USD, file))
         cfg.func(f"/World/{name}", cfg)
     robot = Articulation(
-        XARM6_CFG.replace(prim_path="/World/Robot", init_state=XARM6_CFG.init_state.replace(pos=(0.0, 0.0, PLATE)))
+        XARM7_CFG.replace(prim_path="/World/Robot", init_state=XARM7_CFG.init_state.replace(pos=(0.0, 0.0, PLATE)))
     )
     cube = RigidObject(RigidObjectCfg(
         prim_path="/World/Cube",
@@ -137,7 +137,7 @@ def main():
     check("cube speed at rest", cube.data.root_lin_vel_w.torch[0].norm().item(), 0.0, 0.01)
     check("robot base height on the plate", robot.data.root_pos_w.torch[0, 2].item(), PLATE - 0.0005, PLATE + 0.0005)
     check("robot holds home pose, worst joint error (rad)",
-          (robot.data.joint_pos.torch - robot.data.default_joint_pos.torch)[0, :6].abs().max().item(), 0.0, 0.01)
+          (robot.data.joint_pos.torch - robot.data.default_joint_pos.torch)[0, :7].abs().max().item(), 0.0, 0.01)
     tcp_z = robot.data.body_pos_w.torch[0, robot.body_names.index("xarm_gripper_base_link"), 2].item()
     check("gripper base clear of the bench", tcp_z, 0.15, 1.0)
     shoot("bench", (1.45, -0.80, 0.95), (0.25, 0.25, 0.30))

@@ -1,4 +1,4 @@
-"""M1: scripted pick-and-place expert on XArm6-PickPlace-IK-v0 (absolute TCP pose + binary gripper).
+"""M1: scripted pick-and-place expert on XArm7-PickPlace-IK-v0 (absolute TCP pose + binary gripper).
 
 A per-env state machine: hover over the cube, descend, close, lift, carry to the commanded goal.
 Every finished episode is scored: success = the episode ran to its time-out with the cube within --tol
@@ -39,7 +39,7 @@ import xarm_twin  # noqa: E402,F401
 from isaaclab.utils.math import subtract_frame_transforms  # noqa: E402
 from isaaclab_tasks.utils import parse_env_cfg  # noqa: E402
 
-TASK = "XArm6-PickPlace-IK-v0"
+TASK = "XArm7-PickPlace-IK-v0"
 HOVER, DESCEND, GRASP, LIFT, CARRY = range(5)
 DOWN = torch.tensor([1.0, 0.0, 0.0, 0.0])  # x,y,z,w: 180 deg about x, gripper z-axis pointing at the table
 
@@ -119,7 +119,7 @@ def run(cfg):
             gi = robot.joint_names.index("drive_joint")
             print(f"DBG t={int(u.episode_length_buf[0]):3d} st={int(state[0])} tcp={[round(v,3) for v in tcp[0].tolist()]} "
                   f"cube={[round(v,3) for v in cube[0].tolist()]} goal={[round(v,3) for v in goal[0].tolist()]} "
-                  f"drive={robot.data.joint_pos.torch[0, gi].item():.3f} tau={[round(v,1) for v in robot.actuators.applied_effort.torch[0,:7].tolist()]} q={[round(v,2) for v in robot.data.joint_pos.torch[0,:6].tolist()]} qt={[round(v,2) for v in robot.actuators.target_command.position.torch[0,:6].tolist()]}", flush=True)
+                  f"drive={robot.data.joint_pos.torch[0, gi].item():.3f} tau={[round(v,1) for v in robot.actuators.applied_effort.torch[0,:8].tolist()]} q={[round(v,2) for v in robot.data.joint_pos.torch[0,:7].tolist()]} qt={[round(v,2) for v in robot.actuators.target_command.position.torch[0,:7].tolist()]}", flush=True)
         # Envs that finish on this step are reset inside env.step, so the error is taken from the state
         # just before it (one control step old), against the goal that episode was given.
         err = ((tcp if args.ik_test else cube) - goal).norm(dim=-1)

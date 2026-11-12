@@ -7,7 +7,7 @@
   lab_lights.usd  dome + ceiling light. Spawn once per stage, not once per environment.
   paper_cube.usd  5.2 cm paper-wrapped cube, rigid body.
   food_bowl.usd   square frosted food container, rigid body, five box colliders (the cavity stays open).
-  lab_scene.usd   assembly of the files above plus a ground plane and the xArm6 with its wrist depth camera, for opening in
+  lab_scene.usd   assembly of the files above plus a ground plane and the xArm7 with its wrist depth camera, for opening in
                   Isaac Sim. Pick /Scene/Bench/OverheadCam/camera or .../wrist_cam/camera in the viewport.
 
 Frame: origin at the centre of arm A's base on the bench top (z = 0). +X across the bench away from the
@@ -36,9 +36,9 @@ sys.path.insert(0, ROOT)
 from xarm_twin import cameras as cams  # noqa: E402
 
 OUT = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "usd"))
-STOCK_XARM6 = (
-    "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac"
-    "/Robots/Ufactory/xarm6/xarm6.usd"
+STOCK_XARM7 = (
+    "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/6.2/Isaac"
+    "/Robots/Ufactory/xarm7/xarm7.usd"
 )
 
 # ---- dimensions (m, kg) ---------------------------------------------------------------------------
@@ -283,8 +283,8 @@ def build_bench():
         box(s, "/World/MountB", PLATE, (0.0, ARM_B_Y, PLATE[2] / 2), plate, alu, collide=True)
         holder = UsdGeom.Xform.Define(s, "/World/RobotB")
         holder.AddTranslateOp().Set(Gf.Vec3d(0.0, ARM_B_Y, ROBOT_Z))
-        arm = s.DefinePrim("/World/RobotB/xarm6")
-        arm.GetReferences().AddReference(STOCK_XARM6)
+        arm = s.DefinePrim("/World/RobotB/xarm7")
+        arm.GetReferences().AddReference(STOCK_XARM7)
         for name, choice in (("Physics", "None"), ("Variant_Set", "xarm_gripper"), ("Sensor", "None")):
             arm.GetVariantSets().SetSelection(name, choice)
         live = [
@@ -438,8 +438,8 @@ def build_assembly():
             UsdGeom.Xformable(prim).AddTranslateOp().Set(Gf.Vec3d(*pos))
     holder = UsdGeom.Xform.Define(s, "/Scene/RobotA")
     holder.AddTranslateOp().Set(Gf.Vec3d(0.0, 0.0, ROBOT_Z))
-    s.DefinePrim("/Scene/RobotA/xarm6").GetReferences().AddReference("./xarm6_gripper.usd")
-    link = s.GetPrimAtPath("/Scene/RobotA/xarm6/" + cams.WRIST_PARENT)
+    s.DefinePrim("/Scene/RobotA/xarm7").GetReferences().AddReference("./xarm7_gripper.usd")
+    link = s.GetPrimAtPath("/Scene/RobotA/xarm7/" + cams.WRIST_PARENT)
     if not link or link.IsInstanceProxy():
         raise RuntimeError(f"gripper link {cams.WRIST_PARENT} not found in the robot asset")
     silver = look(s, "/Scene/Looks/CameraBody", (0.72, 0.73, 0.75), 0.4, metallic=0.2)
