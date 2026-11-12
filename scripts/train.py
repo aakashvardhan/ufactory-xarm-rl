@@ -1,7 +1,7 @@
-r"""Run Isaac Lab's rsl_rl train.py with the xarm_twin tasks registered.
+r"""Run Isaac Lab's `isaaclab train` (rsl_rl by default) with the xarm_twin tasks registered.
 
-Usage: C:\IsaacLab\.venv\Scripts\python.exe scripts\train.py --task XArm6-PickPlace-v0 --headless
+Usage: C:\IsaacLab3\.venv\Scripts\python.exe scripts\train.py --task XArm6-PickPlace-v0 --headless
 """
-from _launch import run_rsl_rl
+from _launch import run_rl
 
-run_rsl_rl("train.py")
+run_rl("train")

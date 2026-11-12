@@ -7,7 +7,7 @@ import gymnasium as gym
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import xarm_twin  # noqa: E402,F401
 
-TASKS = ("XArm6-PickPlace-v0", "XArm6-PickPlace-Play-v0", "XArm6-PickPlace-IK-v0")
+TASKS = ("XArm6-PickPlace-v0", "XArm6-PickPlace-IK-v0")
 
 
 def test_tasks_registered():

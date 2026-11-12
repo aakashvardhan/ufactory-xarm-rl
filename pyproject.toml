@@ -6,9 +6,13 @@ build-backend = "setuptools.build_meta"
 name = "xarm_twin"
 version = "0.1.0"
 description = "UFactory xArm6 + xArm gripper tasks for Isaac Lab"
-requires-python = ">=3.10"
+requires-python = ">=3.12,<3.13"
 # Isaac Sim / Isaac Lab are installed separately (see README); only the import-time dependency is listed.
 dependencies = ["gymnasium"]
+
+# `isaaclab train/play/list_envs` import this module to register the XArm6-* gym ids.
+[project.entry-points."isaaclab.tasks"]
+xarm_twin = "xarm_twin.tasks"
 
 [tool.setuptools.packages.find]
 include = ["xarm_twin*"]

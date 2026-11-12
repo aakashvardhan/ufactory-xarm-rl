@@ -16,8 +16,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 import torch  # noqa: E402,F401
 import tensordict  # noqa: E402,F401
+import h5py  # noqa: E402,F401  (must load before Kit's own HDF5 DLL when running with the GUI)
 
-from isaaclab.app import AppLauncher  # noqa: E402
+from isaaclab.app import add_launcher_args, launch_simulation  # noqa: E402
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--num_envs", type=int, default=64)
@@ -29,9 +30,8 @@ parser.add_argument(
     "--ik_test", action="store_true", help="ignore the cube; send the TCP straight to the goal and score the TCP"
 )
 parser.add_argument("--grasp_dz", type=float, default=0.0, help="TCP height relative to cube centre at grasp")
-AppLauncher.add_app_launcher_args(parser)
+add_launcher_args(parser)
 args = parser.parse_args()
-app = AppLauncher(args).app
 
 import gymnasium as gym  # noqa: E402
 
@@ -41,7 +41,7 @@ from isaaclab_tasks.utils import parse_env_cfg  # noqa: E402
 
 TASK = "XArm6-PickPlace-IK-v0"
 HOVER, DESCEND, GRASP, LIFT, CARRY = range(5)
-DOWN = torch.tensor([0.0, 1.0, 0.0, 0.0])  # w,x,y,z: gripper z-axis pointing at the table
+DOWN = torch.tensor([1.0, 0.0, 0.0, 0.0])  # x,y,z,w: 180 deg about x, gripper z-axis pointing at the table
 
 # State machine: a state ends when the TCP is within the distance tolerance or its time budget runs out.
 HOVER_TOL, HOVER_TIMEOUT = 0.015, 1.2  # m, s
@@ -53,6 +53,11 @@ DEBUG_EVERY = 5  # steps
 
 def main():
     cfg = parse_env_cfg(TASK, device=args.device, num_envs=args.num_envs)
+    with launch_simulation(cfg, args):
+        run(cfg)
+
+
+def run(cfg):
     env = gym.make(TASK, cfg=cfg)
     u = env.unwrapped
     dev = u.device
@@ -66,15 +71,15 @@ def main():
 
     def in_root_frame(pos_w):
         # The IK action and the goal command are both expressed in the robot root frame.
-        pos, _ = subtract_frame_transforms(robot.data.root_pos_w, robot.data.root_quat_w, pos_w)
+        pos, _ = subtract_frame_transforms(robot.data.root_pos_w.torch, robot.data.root_quat_w.torch, pos_w)
         return pos
 
     env.reset()
     done_eps, successes, dropped, final_err = 0, 0, 0, []
-    while done_eps < args.episodes and app.is_running():
-        cube = in_root_frame(u.scene["object"].data.root_pos_w)
+    while done_eps < args.episodes and u.sim.is_running():
+        cube = in_root_frame(u.scene["object"].data.root_pos_w.torch)
         goal = u.command_manager.get_command("object_pose")[:, :3]
-        tcp = in_root_frame(u.scene["ee_frame"].data.target_pos_w[:, 0, :])
+        tcp = in_root_frame(u.scene["ee_frame"].data.target_pos_w.torch[:, 0, :])
         target = cube.clone()
         target[:, 2] += args.hover
         grip = torch.ones(n, device=dev)  # +1 open, -1 close
@@ -114,7 +119,7 @@ def main():
             gi = robot.joint_names.index("drive_joint")
             print(f"DBG t={int(u.episode_length_buf[0]):3d} st={int(state[0])} tcp={[round(v,3) for v in tcp[0].tolist()]} "
                   f"cube={[round(v,3) for v in cube[0].tolist()]} goal={[round(v,3) for v in goal[0].tolist()]} "
-                  f"drive={robot.data.joint_pos[0, gi].item():.3f} tau={[round(v,1) for v in robot.data.applied_torque[0,:7].tolist()]} q={[round(v,2) for v in robot.data.joint_pos[0,:6].tolist()]} qt={[round(v,2) for v in robot.data.joint_pos_target[0,:6].tolist()]}", flush=True)
+                  f"drive={robot.data.joint_pos.torch[0, gi].item():.3f} tau={[round(v,1) for v in robot.actuators.applied_effort.torch[0,:7].tolist()]} q={[round(v,2) for v in robot.data.joint_pos.torch[0,:6].tolist()]} qt={[round(v,2) for v in robot.actuators.target_command.position.torch[0,:6].tolist()]}", flush=True)
         # Envs that finish on this step are reset inside env.step, so the error is taken from the state
         # just before it (one control step old), against the goal that episode was given.
         err = ((tcp if args.ik_test else cube) - goal).norm(dim=-1)
@@ -142,4 +147,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    app.close()

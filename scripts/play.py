@@ -1,7 +1,7 @@
-r"""Run Isaac Lab's rsl_rl play.py with the xarm_twin tasks registered.
+r"""Run Isaac Lab's `isaaclab play` (rsl_rl by default) with the xarm_twin tasks registered.
 
-Usage: C:\IsaacLab\.venv\Scripts\python.exe scripts\play.py --task XArm6-PickPlace-Play-v0 --headless
+Usage: C:\IsaacLab3\.venv\Scripts\python.exe scripts\play.py --task XArm6-PickPlace-v0 --checkpoint latest --viz kit
 """
-from _launch import run_rsl_rl
+from _launch import run_rl
 
-run_rsl_rl("play.py")
+run_rl("play")

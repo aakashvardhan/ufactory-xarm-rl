@@ -7,11 +7,8 @@ everything else (meshes, mimic joints, drives) by reference.
 """
 import os
 
-from isaaclab.app import AppLauncher
+from isaaclab.app import launch_simulation
 
-app = AppLauncher(headless=True).app
-
-from pxr import Usd, UsdPhysics  # noqa: E402
 
 ASSET_ROOT = "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac"
 SRC = f"{ASSET_ROOT}/Robots/Ufactory/xarm6/xarm6.usd"
@@ -20,6 +17,8 @@ OUT = os.path.normpath(os.path.join(HERE, "..", "assets", "usd", "xarm6_gripper.
 
 
 def main():
+    from pxr import Usd, UsdPhysics
+
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     stage = Usd.Stage.CreateNew(OUT)
     root = stage.DefinePrim("/UF_ROBOT")
@@ -44,5 +43,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
-    app.close()
+    with launch_simulation(None, {"require_kit": True}):
+        main()
