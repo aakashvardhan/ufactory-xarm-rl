@@ -57,15 +57,17 @@ def look_quat(direction, up):
 
 
 # Wrist camera, in the frame of the gripper base link (z runs along the fingers, the fingers open along y).
-# It sits beside the gripper body and looks along the fingers, tilted 15 degrees toward them.
+# It sits beside the gripper body and looks along the fingers, tilted 15 degrees toward them. Image-up
+# points back toward the gripper body (-x).
 WRIST_PARENT = "gripper/xarm_gripper_base_link"  # below the robot's root prim
 WRIST_POS = (0.070, 0.0, 0.030)
 WRIST_TILT = math.radians(15.0)
-WRIST_QUAT = look_quat((-math.sin(WRIST_TILT), 0.0, math.cos(WRIST_TILT)), (1.0, 0.0, 0.0))
+WRIST_QUAT = look_quat((-math.sin(WRIST_TILT), 0.0, math.cos(WRIST_TILT)), (-1.0, 0.0, 0.0))
 
 # Overhead camera, in the bench frame: on the Tarion TKA01-L desk-mount stand, looking straight down.
-# The image's horizontal axis runs along the bench (+Y); image-up points at the mounting edge (-X).
+# The image's horizontal axis runs along the bench (image-right is -Y); image-up points away from the
+# mounting edge (+X).
 # The stand sets the limit here: 0.80 m up over x = 0.35 needs the whole stand stretched out straight, so
 # the camera sits at 0.65 m. It is shifted toward the bowl (+Y) to keep the arm out of the middle of the view.
 OVERHEAD_POS = (0.32, 0.25, 0.65)
-OVERHEAD_QUAT = look_quat((0.0, 0.0, -1.0), (-1.0, 0.0, 0.0))
+OVERHEAD_QUAT = look_quat((0.0, 0.0, -1.0), (1.0, 0.0, 0.0))
