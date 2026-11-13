@@ -1,6 +1,6 @@
 """Depth cameras of the lab-bench scene: one source for scripts/build_scene.py and the Isaac Lab configs.
 
-Pure Python, no Isaac imports. Both poses are estimates from photos.
+Pure Python, no Isaac imports. Overhead height is measured; horizontal placement and wrist pose are estimates.
 
 Quaternions are (w, x, y, z), the order USD's Gf.Quatd takes, in the USD camera convention: the camera
 looks along its -Z axis and +Y is image up. Isaac Lab 3 takes (x, y, z, w): pass xyzw(q) to
@@ -64,10 +64,17 @@ WRIST_POS = (0.070, 0.0, 0.030)
 WRIST_TILT = math.radians(15.0)
 WRIST_QUAT = look_quat((-math.sin(WRIST_TILT), 0.0, math.cos(WRIST_TILT)), (-1.0, 0.0, 0.0))
 
-# Overhead camera, in the bench frame: on the Tarion TKA01-L desk-mount stand, looking straight down.
-# The image's horizontal axis runs along the bench (image-right is -Y); image-up points away from the
-# mounting edge (+X).
-# The stand sets the limit here: 0.80 m up over x = 0.35 needs the whole stand stretched out straight, so
-# the camera sits at 0.65 m. It is shifted toward the bowl (+Y) to keep the arm out of the middle of the view.
-OVERHEAD_POS = (0.32, 0.25, 0.65)
-OVERHEAD_QUAT = look_quat((0.0, 0.0, -1.0), (1.0, 0.0, 0.0))
+# Overhead camera in the bench frame, on the Tarion TKA01-L stand and tilted toward the workspace.
+# Image-up approximately follows -X, toward the opposite long edge.
+# Photo refinement: clamp and robot are on the same (+X) long edge. Clamp is 56 cm from the photo's
+# reference J1 at X=0.583 m; subsequent robot-base translations keep the camera stand fixed.
+# The boom reaches inward (-X) and left (-Y) at 45 degrees; lens height remains the measured 81.2 cm.
+# Its 42 cm horizontal reach and optical aim are inferred from the side photos, not calibrated extrinsics.
+BASE_TO_CAMERA_MOUNT = 0.560
+STAND_BASE_XY = (0.774, math.sqrt(BASE_TO_CAMERA_MOUNT**2 - (0.774 - 0.583)**2))
+STAND_YAW_LEFT_DEG = 45.0
+_boom_direction = (-math.cos(math.radians(STAND_YAW_LEFT_DEG)),
+                   -math.sin(math.radians(STAND_YAW_LEFT_DEG)), 0.0)
+OVERHEAD_POS = (STAND_BASE_XY[0] + 0.42 * _boom_direction[0],
+                STAND_BASE_XY[1] + 0.42 * _boom_direction[1], 0.812)
+OVERHEAD_QUAT = look_quat((-0.35, 0.20, -0.812), (-1.0, 0.0, 0.0))
