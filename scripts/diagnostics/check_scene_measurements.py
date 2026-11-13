@@ -3,6 +3,7 @@
 Run with the Isaac Lab Python environment. This never connects to the physical robot.
 """
 import math
+import json
 import os
 
 from isaaclab.app import launch_simulation
@@ -40,10 +41,22 @@ def check():
     top_edge = centre[0] - scale[0] / 2
     bowl = matrix("/Scene/Bowl").ExtractTranslation()
     cube = matrix("/Scene/Cube").ExtractTranslation()
-    close("B rim to opposite top long edge", bowl[0] - 0.150 / 2 - top_edge, 0.143)
-    close("A top side to opposite top long edge", cube[0] - 0.052 / 2 - top_edge, 0.180)
-    close("photo-reference J1 to B bottom-right rim corner", math.hypot(bowl[0] + 0.150 / 2 - 0.583,
-                                                     bowl[1] + 0.150 / 2 - base_position[1]), 0.530)
+    scan_path = os.path.join(root, "assets", "calibration", "tabletop_scan.json")
+    if os.path.isfile(scan_path):
+        with open(scan_path, encoding="utf-8") as scan_file:
+            scan = json.load(scan_file)
+        for name, position in (("cube", cube), ("bowl", bowl)):
+            for axis in (0, 1):
+                close(f"physical scan {name} {'XY'[axis]}", position[axis], scan["object_xy_m"][name][axis])
+        close("cube rests on tabletop", cube[2] - top, .026)
+        close("bowl rests on tabletop", bowl[2] - top, 0)
+    else:
+        close("B rim to opposite top long edge", bowl[0] - 0.150 / 2 - top_edge, 0.143)
+        close("A top side to opposite top long edge", cube[0] - 0.052 / 2 - top_edge, 0.180)
+        close("photo-reference J1 to B bottom-right rim corner", math.hypot(bowl[0] + 0.150 / 2 - 0.583,
+                                                         bowl[1] + 0.150 / 2 - base_position[1]), 0.530)
+    close("B edge-gap metadata", notes["bowl_top_edge_gap_m"], bowl[0] - .075 - top_edge)
+    close("A edge-gap metadata", notes["cube_top_edge_gap_m"], cube[0] - .026 - top_edge)
     close("current J1 to B corner metadata", notes["current_base_to_bowl_bottom_right_corner_m"],
           math.hypot(bowl[0] + 0.075 - base_position[0], bowl[1] + 0.075 - base_position[1]))
     assert cube[1] > bowl[1], "A should be to the right of B in IMG_2474"

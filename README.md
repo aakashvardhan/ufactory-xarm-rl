@@ -90,6 +90,15 @@ that the gym ids are registered.
 
 ## Modelling notes
 
+- **Physical overhead scan:** `assets/calibration/tabletop_scan.json` overrides A/B XY placement on
+  rebuild. A is at **(0.107, 0.244) m** and B at **(0.102, -0.081) m** in the tabletop frame.
+  RealSense D435i **134322070512** supplied 20 aligned depth frames and RGB. Registration fits the
+  wood tabletop and its adjoining long/short edges at scene corner **(-0.120, -0.221) m**.
+  The plane residual is **1.68 mm**, not an absolute placement-accuracy claim. Transparent bowl depth
+  is unreliable, so its centre uses the visible rim outline at the retained 65 mm rim height.
+  Treat placement as approximate at centimetre scale. Dimensions, orientations and resting heights
+  are retained. This supersedes the photo-derived A/B placement and distances described below;
+  the scene camera pose remains the earlier estimate. Capture and analysis are in `logs/physical_scan/`.
 - Active scene arm: **192.168.1.220**. The table is **92.4 x 183.1 cm**. J1 uses the requested
   scene position **X = 70.1 cm, Y = 0**, **10.3 cm** inside the +X long edge and **22.1 cm** from
   the left short edge. The scene origin remains the previous base location. The assembly is raised

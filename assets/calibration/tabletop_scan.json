@@ -1,0 +1,91 @@
+{
+  "camera_serial": "134322070512",
+  "captured_unix": 1794552556.3737984,
+  "method": "RGB-D tabletop plane and two adjoining table edges; visually selected A top and B rim centres",
+  "table_corner_xy_m": [
+    -0.12,
+    -0.221
+  ],
+  "table_size_xy_m": [
+    0.924,
+    1.831
+  ],
+  "camera_intrinsics": {
+    "width": 1280,
+    "height": 720,
+    "fx": 905.6142578125,
+    "fy": 903.8671875,
+    "ppx": 646.0220947265625,
+    "ppy": 357.9317626953125,
+    "model": "distortion.inverse_brown_conrady",
+    "coeffs": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "camera_to_table_transform": [
+    [
+      -0.6598798412192695,
+      0.6700257270751234,
+      -0.3400354690468095,
+      0.3633221081782001
+    ],
+    [
+      0.751366478515263,
+      0.5868411649636135,
+      -0.3017712081490243,
+      0.23477922486877686
+    ],
+    [
+      -0.0026476623660099704,
+      -0.45462398986591235,
+      -0.8906795258241847,
+      0.8526511899366395
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "plane_rms_m": 0.0016800521222568767,
+  "table_edge_angle_error_deg": -0.01848576212974251,
+  "corner_pixel": [
+    627.8768310546875,
+    184.47625732421875
+  ],
+  "object_pixels": {
+    "cube": [
+      851,
+      579
+    ],
+    "bowl": [
+      582,
+      356
+    ]
+  },
+  "cube_top_height_observed_m": 0.06427597914121913,
+  "bowl_rim_height_used_m": 0.065,
+  "object_xy_m": {
+    "cube": [
+      0.107,
+      0.244
+    ],
+    "bowl": [
+      0.102,
+      -0.081
+    ]
+  },
+  "limitations": [
+    "Scene table corner identity and axes follow the supplied photos.",
+    "Bowl transparent walls have mixed/background depth; placement uses RGB rim outline and retained rim height.",
+    "Object dimensions, orientations, resting heights, robot and scene camera poses are retained.",
+    "Plane residual is not absolute registration accuracy; object placement is approximate, at centimetre scale."
+  ],
+  "raw_capture": "logs/physical_scan/134322070512_depth.npz",
+  "rgb_capture": "logs/physical_scan/134322070512_rgb.png"
+}

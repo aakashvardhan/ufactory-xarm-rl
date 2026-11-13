@@ -22,6 +22,7 @@ Unmeasured dimensions and the robot's horizontal TCP location remain estimates; 
 Usage: C:\IsaacLab3\.venv\Scripts\python.exe scripts\build_scene.py
 """
 import math
+import json
 import os
 import sys
 
@@ -86,6 +87,16 @@ BOWL_CORNER_Y = math.sqrt(BASE_TO_BOWL_CORNER**2 - (BOWL_CORNER_X - PHOTO_BASE_X
 OBJECT_Y_SHIFT = 0.0  # absolute positions now fitted to photo orientation and measured distances
 BOWL_START = (BOWL_X, BOWL_CORNER_Y - BOWL_RIM / 2, 0.0)
 CUBE_START = (TOP_EDGE_X + CUBE_TOP_EDGE_GAP + CUBE_EDGE / 2, BOWL_START[1] + 0.384, CUBE_EDGE / 2)
+SCAN_PATH = os.path.join(ROOT, "assets", "calibration", "tabletop_scan.json")
+SCAN = None
+if os.path.isfile(SCAN_PATH):
+    with open(SCAN_PATH, encoding="utf-8") as scan_file:
+        SCAN = json.load(scan_file)
+    CUBE_START = (*SCAN["object_xy_m"]["cube"], CUBE_EDGE / 2)
+    BOWL_START = (*SCAN["object_xy_m"]["bowl"], 0.0)
+    CUBE_TOP_EDGE_GAP = CUBE_START[0] - CUBE_EDGE / 2 - TOP_EDGE_X
+    BOWL_TOP_EDGE_GAP = BOWL_START[0] - BOWL_RIM / 2 - TOP_EDGE_X
+    BOWL_CORNER_X, BOWL_CORNER_Y = BOWL_START[0] + BOWL_RIM / 2, BOWL_START[1] + BOWL_RIM / 2
 
 
 def new_stage(name, root):
@@ -562,7 +573,10 @@ def build_assembly():
         "assumptions": "Photo orientation: robot and pole share the +X long edge; A/B top-edge gaps "
                        "are measured from the opposite -X edge, and B is left of A (+Y right). "
                        "J1 uses the requested X=0.701 m position, 10.3 cm inside the mounting edge. "
-                       "Camera and A/B retain their photo layout measured from the former X=0.583 m base. "
+                       "Camera retains its photo layout measured from the former X=0.583 m base. "
+                       + ("A/B XY positions use the physical overhead RGB-D table-edge registration in "
+                          "assets/calibration/tabletop_scan.json; transparent bowl placement is approximate. "
+                          if SCAN else "A/B retain their photo layout. ") +
                        "Base distances use centres; bowl corner uses its outer rim rectangle. "
                        "Pose is fitted from the recorded .220 joint seed and measured finger height, not a live robot command. "
                        "Camera aim, 42 cm boom projection, bowl size, A/B separation, tower/props, wood/paper appearance "
